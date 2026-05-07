@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Phrase Master - 10 Nhóm Câu Thông Dụng cụa Tom đẹp trai</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; transition: background-color 0.5s ease; }
+        .card-inner { transition: transform 0.6s; transform-style: preserve-3d; cursor: pointer; }
+        .card-flipped { transform: rotateY(180deg); }
+        .card-front, .card-back { backface-visibility: hidden; position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .card-back { transform: rotateY(180deg); }
+        .theme-transition { transition: all 0.5s ease; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="p-4 md:p-8" id="bodyBg">
+
+    <div id="app" class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <div id="iconBg" class="inline-block p-4 rounded-full mb-4 theme-transition bg-blue-500 text-white shadow-lg">
+                <i class="fas fa-microphone-alt text-2xl"></i>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-2">English Phrase Master</h1>
+            <p class="text-slate-600 italic font-medium">Học các cụm từ cốt lõi với giọng nữ thần chuẩn</p>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <div class="flex justify-center mb-8 bg-white/50 backdrop-blur rounded-2xl p-1 shadow-sm border border-white/20">
+            <button onclick="changeTab('learn')" id="tab-learn" class="flex-1 py-3 font-bold rounded-xl transition-all duration-300 bg-blue-500 text-white shadow-md active-tab-btn">Học Tập với Tom nhó</button>
+            <button onclick="changeTab('quiz')" id="tab-quiz" class="flex-1 py-3 font-bold rounded-xl transition-all duration-300 text-slate-500 hover:text-blue-500">Luyện Tập nha các Vk</button>
+        </div>
+
+        <!-- Group Selector -->
+        <div class="mb-8 bg-white p-5 rounded-3xl shadow-xl border border-white">
+            <label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Chọn nhóm chủ đề:</label>
+            <select id="groupSelect" onchange="loadGroupData()" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none cursor-pointer font-semibold text-slate-700 theme-transition">
+                <!-- Options populated by JS -->
+            </select>
+        </div>
+
+        <!-- Learning Section -->
+        <div id="learnSection">
+            <div class="relative h-80 w-full max-w-md mx-auto mb-10">
+                <div id="flashcard" class="card-inner w-full h-full relative" onclick="this.classList.toggle('card-flipped')">
+                    <!-- Front -->
+                    <div class="card-front bg-white border border-slate-100 rounded-[2.5rem] shadow-2xl flex flex-col items-center justify-center p-8 text-center">
+                        <div id="tagEn" class="px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-6 theme-transition bg-blue-100 text-blue-600">English</div>
+                        <h2 id="phraseEn" class="text-2xl md:text-4xl font-extrabold text-slate-800 leading-tight mb-8">...</h2>
+                        <button onclick="speakText(event)" id="speakBtn" class="w-16 h-16 rounded-full flex items-center justify-center text-white transition-all transform hover:scale-110 shadow-xl theme-transition bg-blue-500">
+                            <i class="fas fa-play text-xl"></i>
+                        </button>
+                    </div>
+                    <!-- Back -->
+                    <div id="cardBack" class="card-back rounded-[2.5rem] shadow-2xl flex flex-col items-center justify-center p-8 text-center text-white theme-transition bg-blue-600">
+                        <div class="px-4 py-1 bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest mb-6">Vietnamese</div>
+                        <h2 id="phraseVi" class="text-2xl md:text-3xl font-bold leading-tight">...</h2>
+                        <div class="mt-10 opacity-60 text-sm">
+                            <i class="fas fa-sync-alt mr-2"></i> Nhấn để quay lại
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-center items-center space-x-6">
+                <button onclick="prevPhrase()" class="w-16 h-16 bg-white rounded-2xl shadow-lg flex items-center justify-center hover:bg-slate-50 text-slate-400 hover:text-slate-800 transition-all border border-slate-100">
+                    <i class="fas fa-chevron-left text-xl"></i>
+                </button>
+                <div id="counterBg" class="px-8 py-3 rounded-2xl font-black shadow-lg theme-transition bg-slate-800 text-white">
+                    <span id="counter">1 / 20</span>
+                </div>
+                <button onclick="nextPhrase()" class="w-16 h-16 bg-white rounded-2xl shadow-lg flex items-center justify-center hover:bg-slate-50 text-slate-400 hover:text-slate-800 transition-all border border-slate-100">
+                    <i class="fas fa-chevron-right text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Quiz Section -->
+        <div id="quizSection" class="hidden">
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl border border-white">
+                <div class="flex items-center justify-between mb-8">
+                    <h3 class="text-2xl font-black text-slate-800">Kiểm tra: <span id="quizGroupName" class="text-blue-600"></span></h3>
+                    <button onclick="setupQuiz()" class="p-3 rounded-xl bg-slate-100 text-slate-500 hover:bg-blue-500 hover:text-white transition-all">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                </div>
+                <div id="quizContent" class="space-y-4"></div>
+                <button onclick="checkQuiz()" id="checkBtn" class="mt-10 w-full py-5 text-white font-black text-lg rounded-2xl transition-all shadow-xl hover:-translate-y-1 theme-transition bg-blue-600">
+                    KIỂM TRA ĐÁP ÁN
+                </button>
+                <div id="quizFeedback" class="mt-6 p-5 rounded-2xl hidden text-center font-bold"></div>
+            </div>
+        </div>
+
+        <footer class="mt-16 text-center text-slate-400 text-xs tracking-widest uppercase pb-10">
+            <p>Designed for Success • © 2024</p>
+        </footer>
+    </div>
+
+    <script>
+        const themes = {
+            1: { bg: "#eff6ff", primary: "#3b82f6", dark: "#1e40af", light: "#dbeafe" },
+            2: { bg: "#ecfdf5", primary: "#10b981", dark: "#065f46", light: "#d1fae5" },
+            3: { bg: "#fff7ed", primary: "#f59e0b", dark: "#92400e", light: "#ffedd5" },
+            4: { bg: "#fdf2f8", primary: "#ec4899", dark: "#9d174d", light: "#fce7f3" },
+            5: { bg: "#f5f3ff", primary: "#8b5cf6", dark: "#5b21b6", light: "#ede9fe" },
+            6: { bg: "#f0fdfa", primary: "#14b8a6", dark: "#115e59", light: "#ccfbf1" },
+            7: { bg: "#fffbeb", primary: "#facc15", dark: "#854d0e", light: "#fef9c3" },
+            8: { bg: "#fef2f2", primary: "#ef4444", dark: "#991b1b", light: "#fee2e2" },
+            9: { bg: "#f8fafc", primary: "#64748b", dark: "#1e293b", light: "#f1f5f9" },
+            10: { bg: "#fafaf9", primary: "#78716c", dark: "#44403c", light: "#f5f5f4" }
+        };
+
+        const phraseData = {
+            1: { name: "1. Chào hỏi & Xã giao", items: [
+                { en: "How's it going?", vi: "Mọi chuyện thế nào rồi?" },
+                { en: "Long time no see.", vi: "Lâu rồi không gặp." },
+                { en: "Nice to meet you.", vi: "Rất vui được gặp bạn." },
+                { en: "Take care!", vi: "Bảo trọng nhé!" },
+                { en: "Have a good one.", vi: "Chúc một ngày tốt lành." },
+                { en: "I’m doing well, thanks.", vi: "Tôi khỏe, cảm ơn." },
+                { en: "What have you been up to?", vi: "Dạo này bạn làm gì rồi?" },
+                { en: "Catch you later.", vi: "Gặp lại bạn sau nhé." },
+                { en: "It was nice chatting with you.", vi: "Thật vui khi nói chuyện với bạn." },
+                { en: "Pleased to meet you.", vi: "Hân hạnh được gặp bạn." },
+                { en: "How are things?", vi: "Mọi việc thế nào?" },
+                { en: "Can't complain.", vi: "Không có gì để phàn nàn." },
+                { en: "I've been better.", vi: "Tôi từng tốt hơn (hiện tại không ổn lắm)." },
+                { en: "Give my regards to...", vi: "Cho tôi gửi lời hỏi thăm đến..." },
+                { en: "It's a pleasure to meet you.", vi: "Thật hân hạnh được gặp bạn." },
+                { en: "How do you do?", vi: "Chào bạn (lần đầu gặp, trang trọng)." },
+                { en: "Keep in touch.", vi: "Giữ liên lạc nhé." },
+                { en: "See you around.", vi: "Gặp lại sau nhé." },
+                { en: "Have a nice day.", vi: "Chúc một ngày tốt đẹp." },
+                { en: "I must be going.", vi: "Tôi phải đi rồi." }
+            ]},
+            2: { name: "2. Ý kiến & Thảo luận", items: [
+                { en: "In my opinion...", vi: "Theo ý kiến của tôi..." },
+                { en: "To be honest...", vi: "Thành thật mà nói..." },
+                { en: "As far as I know...", vi: "Theo như tôi biết..." },
+                { en: "I totally agree.", vi: "Tôi hoàn toàn đồng ý." },
+                { en: "I see your point.", vi: "Tôi hiểu ý của bạn." },
+                { en: "That makes sense.", vi: "Điều đó có vẻ hợp lý." },
+                { en: "I’m not so sure about that.", vi: "Tôi không chắc về điều đó lắm." },
+                { en: "I’m with you on this.", vi: "Tôi đồng ý với bạn về việc này." },
+                { en: "If you ask me...", vi: "Nếu bạn hỏi tôi..." },
+                { en: "I reckon that...", vi: "Tôi cho rằng là..." },
+                { en: "You're absolutely right.", vi: "Bạn hoàn toàn đúng." },
+                { en: "That's a good point.", vi: "Đó là một ý hay." },
+                { en: "I beg to differ.", vi: "Tôi xin phép có ý kiến khác." },
+                { en: "No doubt about it.", vi: "Không còn nghi ngờ gì nữa." },
+                { en: "That's exactly what I thought.", vi: "Đó chính xác là những gì tôi nghĩ." },
+                { en: "Could you clarify that?", vi: "Bạn có thể làm rõ điều đó không?" },
+                { en: "I'm torn between...", vi: "Tôi đang phân vân giữa..." },
+                { en: "Let's agree to disagree.", vi: "Thôi thì chấp nhận sự khác biệt vậy." },
+                { en: "From my perspective...", vi: "Từ góc nhìn của tôi..." },
+                { en: "It goes without saying.", vi: "Không cần phải nói cũng biết." }
+            ]},
+            3: { name: "3. Công việc & Văn phòng", items: [
+                { en: "Get down to business.", vi: "Bắt đầu vào việc thôi." },
+                { en: "Keep me in the loop.", vi: "Hãy cập nhật thông tin cho tôi nhé." },
+                { en: "Think outside the box.", vi: "Suy nghĩ sáng tạo." },
+                { en: "Call it a day.", vi: "Kết thúc công việc thôi." },
+                { en: "Touch base.", vi: "Liên lạc lại nhé." },
+                { en: "Back to the drawing board.", vi: "Bắt đầu lại từ đầu." },
+                { en: "A win-win situation.", vi: "Đôi bên cùng có lợi." },
+                { en: "Hit the deadline.", vi: "Kịp hạn chót." },
+                { en: "Stay on top of things.", vi: "Kiểm soát tốt mọi việc." },
+                { en: "Work-life balance.", vi: "Cân bằng cuộc sống." },
+                { en: "The bottom line is...", vi: "Điểm mấu chốt là..." },
+                { en: "Get the ball rolling.", vi: "Bắt đầu triển khai thôi." },
+                { en: "Up in the air.", vi: "Vẫn chưa quyết định xong." },
+                { en: "Burn the midnight oil.", vi: "Thức khuya làm việc." },
+                { en: "In the long run.", vi: "Về lâu về dài." },
+                { en: "Play it by ear.", vi: "Tùy cơ ứng biến." },
+                { en: "Cut to the chase.", vi: "Đi thẳng vào vấn đề." },
+                { en: "Take it with a grain of salt.", vi: "Đừng quá tin vào điều đó." },
+                { en: "Ahead of the curve.", vi: "Dẫn đầu xu hướng." },
+                { en: "Let's touch base next week.", vi: "Tuần sau liên lạc lại nhé." }
+            ]},
+            4: { name: "4. Ăn uống & Nhà hàng", items: [
+                { en: "Can I have the check, please?", vi: "Cho tôi xin hóa đơn." },
+                { en: "A table for two.", vi: "Một bàn cho hai người." },
+                { en: "It’s on me.", vi: "Tôi bao (trả tiền)." },
+                { en: "Help yourself.", vi: "Cứ tự nhiên nhé." },
+                { en: "My mouth is watering.", vi: "Thèm chảy nước miếng." },
+                { en: "What do you recommend?", vi: "Bạn gợi ý món nào?" },
+                { en: "I'm full.", vi: "Tôi no rồi." },
+                { en: "Could we get some water?", vi: "Cho xin ít nước." },
+                { en: "To go, please.", vi: "Làm ơn cho mang về." },
+                { en: "Keep the change.", vi: "Cứ giữ tiền lẻ." },
+                { en: "I'm starving.", vi: "Tôi đang đói lả." },
+                { en: "Bon appetit!", vi: "Chúc ngon miệng!" },
+                { en: "I'll have the same.", vi: "Tôi cũng lấy món đó." },
+                { en: "Is this dish spicy?", vi: "Món này có cay không?" },
+                { en: "I'm allergic to peanuts.", vi: "Tôi bị dị ứng lạc." },
+                { en: "Could we have more napkins?", vi: "Cho chúng tôi thêm khăn giấy." },
+                { en: "Enjoy your meal!", vi: "Chúc bạn ăn ngon miệng!" },
+                { en: "It tastes delicious.", vi: "Nó ngon tuyệt." },
+                { en: "Compliments to the chef.", vi: "Gửi lời khen tới đầu bếp." },
+                { en: "Can we get separate checks?", vi: "Chúng tôi trả riêng được không?" }
+            ]},
+            5: { name: "5. Du lịch & Di chuyển", items: [
+                { en: "Where is the departure gate?", vi: "Cổng khởi hành ở đâu?" },
+                { en: "I'd like to book a flight.", vi: "Tôi muốn đặt chuyến bay." },
+                { en: "Is there a direct flight?", vi: "Có chuyến bay thẳng không?" },
+                { en: "Carry-on luggage.", vi: "Hành lý xách tay." },
+                { en: "Check-in desk.", vi: "Quầy làm thủ tục." },
+                { en: "I have a reservation.", vi: "Tôi đã đặt chỗ trước." },
+                { en: "How far is it?", vi: "Nó cách đây bao xa?" },
+                { en: "Go straight ahead.", vi: "Đi thẳng về phía trước." },
+                { en: "Turn left at the corner.", vi: "Rẽ trái ở góc đường." },
+                { en: "Where can I find a taxi?", vi: "Tôi có thể tìm taxi ở đâu?" },
+                { en: "Enjoy your trip!", vi: "Chúc chuyến đi vui vẻ!" },
+                { en: "Boarding pass, please.", vi: "Làm ơn cho xem thẻ lên máy bay." },
+                { en: "Round-trip ticket.", vi: "Vé khứ hồi." },
+                { en: "One-way ticket.", vi: "Vé một chiều." },
+                { en: "The train is on schedule.", vi: "Tàu chạy đúng giờ." },
+                { en: "I'm here for sightseeing.", vi: "Tôi đến đây để tham quan." },
+                { en: "Is breakfast included?", vi: "Có bao gồm bữa sáng không?" },
+                { en: "Wake-up call.", vi: "Dịch vụ gọi báo thức." },
+                { en: "Safe travels!", vi: "Đi thượng lộ bình an!" },
+                { en: "I missed my connection.", vi: "Tôi bị lỡ chuyến nối tiếp." }
+            ]},
+            6: { name: "6. Mua sắm & Tiền bạc", items: [
+                { en: "How much does it cost?", vi: "Cái này giá bao nhiêu?" },
+                { en: "I'm just browsing.", vi: "Tôi chỉ đang xem thôi." },
+                { en: "Can I try this on?", vi: "Tôi có thể thử cái này không?" },
+                { en: "Do you have a smaller size?", vi: "Bạn có size nhỏ hơn không?" },
+                { en: "It fits perfectly.", vi: "Nó vừa khít luôn." },
+                { en: "Is there a discount?", vi: "Có giảm giá không?" },
+                { en: "I'll take it.", vi: "Tôi sẽ lấy cái này." },
+                { en: "Do you accept credit cards?", vi: "Có nhận thẻ tín dụng không?" },
+                { en: "I'd like a refund.", vi: "Tôi muốn hoàn tiền." },
+                { en: "Where is the fitting room?", vi: "Phòng thử đồ ở đâu?" },
+                { en: "Can I get a receipt?", vi: "Cho tôi xin hóa đơn." },
+                { en: "Window shopping.", vi: "Chỉ ngắm đồ chứ không mua." },
+                { en: "It's a bargain.", vi: "Món hời đấy." },
+                { en: "Sold out.", vi: "Đã cháy hàng." },
+                { en: "In stock.", vi: "Còn hàng." },
+                { en: "Expensive / Cheap.", vi: "Đắt / Rẻ." },
+                { en: "Buy one get one free.", vi: "Mua một tặng một." },
+                { en: "Clearance sale.", vi: "Bán xả kho." },
+                { en: "Price tag.", vi: "Nhãn giá." },
+                { en: "Good value for money.", vi: "Đáng đồng tiền bát gạo." }
+            ]},
+            7: { name: "7. Sức khỏe & Thể chất", items: [
+                { en: "I feel under the weather.", vi: "Tôi thấy không khỏe." },
+                { en: "Get well soon!", vi: "Chúc mau khỏe nhé!" },
+                { en: "I have a sore throat.", vi: "Tôi bị đau họng." },
+                { en: "Take a deep breath.", vi: "Hít một hơi thật sâu." },
+                { en: "I'm in good shape.", vi: "Tôi đang rất khỏe mạnh." },
+                { en: "Workout routine.", vi: "Chế độ tập luyện." },
+                { en: "Watch your weight.", vi: "Để ý cân nặng nhé." },
+                { en: "No pain, no gain.", vi: "Không gian nan không thành công." },
+                { en: "Balanced diet.", vi: "Chế độ ăn cân bằng." },
+                { en: "Stay hydrated.", vi: "Hãy uống đủ nước." },
+                { en: "I'm feeling dizzy.", vi: "Tôi thấy chóng mặt." },
+                { en: "Prescription medicine.", vi: "Thuốc kê đơn." },
+                { en: "Over-the-counter.", vi: "Thuốc không cần kê đơn." },
+                { en: "Health insurance.", vi: "Bảo hiểm y tế." },
+                { en: "Catch a cold.", vi: "Bị cảm lạnh." },
+                { en: "Physical exam.", vi: "Khám sức khỏe tổng quát." },
+                { en: "Sleepless night.", vi: "Đêm mất ngủ." },
+                { en: "Break a sweat.", vi: "Đổ mồ hôi (tập luyện)." },
+                { en: "First aid kit.", vi: "Bộ sơ cứu." },
+                { en: "Take a nap.", vi: "Nghỉ trưa một lát." }
+            ]},
+            8: { name: "8. Cảm xúc & Tâm trạng", items: [
+                { en: "I'm over the moon.", vi: "Tôi đang cực kỳ hạnh phúc." },
+                { en: "Cheer up!", vi: "Vui lên nào!" },
+                { en: "Don't let it get you down.", vi: "Đừng để nó làm bạn nản lòng." },
+                { en: "I'm fed up with this.", vi: "Tôi phát ngán với việc này." },
+                { en: "Calm down.", vi: "Bình tĩnh lại nào." },
+                { en: "It's not a big deal.", vi: "Không phải chuyện gì to tát." },
+                { en: "I'm looking forward to it.", vi: "Tôi rất mong chờ nó." },
+                { en: "Take it easy.", vi: "Cứ thong thả đi." },
+                { en: "I'm speechless.", vi: "Tôi không còn lời nào để nói." },
+                { en: "What a relief!", vi: "Thật là nhẹ nhõm!" },
+                { en: "I'm worried sick.", vi: "Tôi lo phát ốm." },
+                { en: "Keep your chin up.", vi: "Hãy lạc quan lên." },
+                { en: "It breaks my heart.", vi: "Nó làm tôi đau lòng." },
+                { en: "I'm on cloud nine.", vi: "Tôi đang ở trên chín tầng mây." },
+                { en: "Don't take it personally.", vi: "Đừng để bụng nhé." },
+                { en: "I lost my temper.", vi: "Tôi đã mất bình tĩnh." },
+                { en: "Mixed feelings.", vi: "Cảm xúc lẫn lộn." },
+                { en: "To be thrilled.", vi: "Cực kỳ hào hứng." },
+                { en: "Better safe than sorry.", vi: "Cẩn thận vẫn hơn." },
+                { en: "Don't be so hard on yourself.", vi: "Đừng quá khắt khe với bản thân." }
+            ]},
+            9: { name: "9. Thời gian & Thói quen", items: [
+                { en: "Once in a blue moon.", vi: "Năm thì mười họa." },
+                { en: "From time to time.", vi: "Thỉnh thoảng." },
+                { en: "Around the clock.", vi: "Suốt ngày đêm." },
+                { en: "Better late than never.", vi: "Thà muộn còn hơn không." },
+                { en: "In the nick of time.", vi: "Vừa kịp lúc." },
+                { en: "Time flies.", vi: "Thời gian trôi nhanh quá." },
+                { en: "Kill some time.", vi: "Giết thời gian." },
+                { en: "So far, so good.", vi: "Mọi thứ đến giờ vẫn ổn." },
+                { en: "Make up for lost time.", vi: "Bù đắp thời gian đã mất." },
+                { en: "Out of the blue.", vi: "Bất thình lình." },
+                { en: "As soon as possible.", vi: "Càng sớm càng tốt." },
+                { en: "Take your time.", vi: "Cứ thong thả." },
+                { en: "On a daily basis.", vi: "Hàng ngày." },
+                { en: "Every now and then.", vi: "Thỉnh thoảng." },
+                { en: "In no time.", vi: "Ngay lập tức." },
+                { en: "Against the clock.", vi: "Chạy đua với thời gian." },
+                { en: "Beat the clock.", vi: "Hoàn thành trước hạn." },
+                { en: "Time's up.", vi: "Hết giờ rồi." },
+                { en: "Make time for...", vi: "Dành thời gian cho..." },
+                { en: "Behind schedule.", vi: "Chậm tiến độ." }
+            ]},
+            10: { name: "10. Thành ngữ & Lóng", items: [
+                { en: "Break a leg!", vi: "Chúc may mắn!" },
+                { en: "Piece of cake.", vi: "Dễ như ăn bánh." },
+                { en: "Under the weather.", vi: "Không khỏe." },
+                { en: "Costs an arm and a leg.", vi: "Rất đắt đỏ." },
+                { en: "Let the cat out of the bag.", vi: "Để lộ bí mật." },
+                { en: "Hit the nail on the head.", vi: "Nói trúng phóc." },
+                { en: "Bite the bullet.", vi: "Cắn răng chịu đựng." },
+                { en: "The best of both worlds.", vi: "Vẹn cả đôi đường." },
+                { en: "See eye to eye.", vi: "Đồng quan điểm." },
+                { en: "Break the ice.", vi: "Phá vỡ sự ngại ngùng." },
+                { en: "Spill the beans.", vi: "Tiết lộ bí mật." },
+                { en: "Once in a blue moon.", vi: "Hiếm khi." },
+                { en: "A blessing in disguise.", vi: "Trong cái rủi có cái may." },
+                { en: "Don't cry over spilt milk.", vi: "Đừng hối tiếc chuyện đã qua." },
+                { en: "Keep an eye on...", vi: "Để mắt tới..." },
+                { en: "Call it a day.", vi: "Nghỉ tay thôi." },
+                { en: "Hang in there.", vi: "Cố gắng lên." },
+                { en: "Cutting corners.", vi: "Làm tắt/đốt cháy giai đoạn." },
+                { en: "Go the extra mile.", vi: "Nỗ lực vượt bậc." },
+                { en: "Easy does it.", vi: "Cứ bình tĩnh mà làm." }
+            ]}
+        };
+
+        let currentGroup = 1;
+        let currentIndex = 0;
+
+        function init() {
+            const select = document.getElementById('groupSelect');
+            if (select) {
+                select.innerHTML = '';
+                for (let id in phraseData) {
+                    let opt = document.createElement('option');
+                    opt.value = id;
+                    opt.textContent = phraseData[id].name;
+                    select.appendChild(opt);
+                }
+            }
+            loadGroupData();
+        }
+
+        function applyTheme(id) {
+            const theme = themes[id] || themes[1];
+            const bodyBg = document.getElementById('bodyBg');
+            const iconBg = document.getElementById('iconBg');
+            const speakBtn = document.getElementById('speakBtn');
+            const cardBack = document.getElementById('cardBack');
+            const checkBtn = document.getElementById('checkBtn');
+            const tagEn = document.getElementById('tagEn');
+
+            if (bodyBg) bodyBg.style.backgroundColor = theme.bg;
+            if (iconBg) iconBg.style.backgroundColor = theme.primary;
+            if (speakBtn) speakBtn.style.backgroundColor = theme.primary;
+            if (cardBack) cardBack.style.backgroundColor = theme.primary;
+            if (checkBtn) checkBtn.style.backgroundColor = theme.primary;
+            
+            if (tagEn) {
+                tagEn.style.backgroundColor = theme.light;
+                tagEn.style.color = theme.primary;
+            }
+
+            // Cập nhật tab active
+            const activeTab = document.querySelector('.active-tab-btn');
+            if (activeTab) activeTab.style.backgroundColor = theme.primary;
+        }
+
+        function loadGroupData() {
+            const select = document.getElementById('groupSelect');
+            if (select) {
+                currentGroup = select.value;
+            }
+            currentIndex = 0;
+            applyTheme(currentGroup);
+            updateCard();
+            setupQuiz();
+        }
+
+        function updateCard() {
+            const group = phraseData[currentGroup];
+            if (!group) return;
+            const items = group.items;
+            const flashcard = document.getElementById('flashcard');
+            if (flashcard) flashcard.classList.remove('card-flipped');
+            
+            const phraseEn = document.getElementById('phraseEn');
+            const phraseVi = document.getElementById('phraseVi');
+            const counter = document.getElementById('counter');
+
+            if (phraseEn) phraseEn.textContent = items[currentIndex].en;
+            if (phraseVi) phraseVi.textContent = items[currentIndex].vi;
+            if (counter) counter.textContent = `${currentIndex + 1} / ${items.length}`;
+        }
+
+        function nextPhrase() {
+            const items = phraseData[currentGroup].items;
+            currentIndex = (currentIndex + 1) % items.length;
+            updateCard();
+        }
+
+        function prevPhrase() {
+            const items = phraseData[currentGroup].items;
+            currentIndex = (currentIndex - 1 + items.length) % items.length;
+            updateCard();
+        }
+
+        function speakText(event) {
+            if (event) event.stopPropagation();
+            const text = phraseData[currentGroup].items[currentIndex].en;
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                const voices = window.speechSynthesis.getVoices();
+                const femaleVoice = voices.find(v => (v.name.includes('Female') || v.name.includes('Google US English') || v.name.includes('Samantha') || v.name.includes('Zira')) && v.lang.startsWith('en'));
+                if (femaleVoice) utterance.voice = femaleVoice;
+
+                utterance.lang = 'en-US';
+                utterance.rate = 0.85;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function changeTab(tab) {
+            const isLearn = tab === 'learn';
+            const learnSection = document.getElementById('learnSection');
+            const quizSection = document.getElementById('quizSection');
+            if (learnSection) learnSection.classList.toggle('hidden', !isLearn);
+            if (quizSection) quizSection.classList.toggle('hidden', isLearn);
+            
+            const theme = themes[currentGroup];
+            const tabLearn = document.getElementById('tab-learn');
+            const tabQuiz = document.getElementById('tab-quiz');
+
+            if (tabLearn && tabQuiz) {
+                if (isLearn) {
+                    tabLearn.className = "flex-1 py-3 font-bold rounded-xl transition-all duration-300 text-white shadow-md active-tab-btn";
+                    tabQuiz.className = "flex-1 py-3 font-bold rounded-xl transition-all duration-300 text-slate-500 hover:text-blue-500";
+                    tabLearn.style.backgroundColor = theme.primary;
+                    tabQuiz.style.backgroundColor = 'transparent';
+                } else {
+                    tabQuiz.className = "flex-1 py-3 font-bold rounded-xl transition-all duration-300 text-white shadow-md active-tab-btn";
+                    tabLearn.className = "flex-1 py-3 font-bold rounded-xl transition-all duration-300 text-slate-500 hover:text-blue-500";
+                    tabQuiz.style.backgroundColor = theme.primary;
+                    tabLearn.style.backgroundColor = 'transparent';
+                }
+            }
+        }
+
+        function setupQuiz() {
+            const group = phraseData[currentGroup];
+            if (!group) return;
+
+            const quizGroupName = document.getElementById('quizGroupName');
+            if (quizGroupName) quizGroupName.textContent = group.name;
+
+            const items = [...group.items].sort(() => Math.random() - 0.5).slice(0, 5);
+            const allVi = group.items.map(i => i.vi).sort(() => Math.random() - 0.5);
+            
+            const quizContent = document.getElementById('quizContent');
+            if (quizContent) {
+                quizContent.innerHTML = '';
+                items.forEach((item) => {
+                    const div = document.createElement('div');
+                    div.className = "p-4 bg-slate-50 rounded-2xl border-2 border-transparent transition-all";
+                    div.innerHTML = `
+                        <p class="font-bold text-slate-700 mb-2">${item.en}</p>
+                        <select data-answer="${item.vi}" class="quiz-answer w-full p-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-400">
+                            <option value="">Chọn nghĩa đúng...</option>
+                            ${allVi.map(v => `<option value="${v}">${v}</option>`).join('')}
+                        </select>
+                    `;
+                    quizContent.appendChild(div);
+                });
+            }
+            
+            const feedback = document.getElementById('quizFeedback');
+            if (feedback) feedback.classList.add('hidden');
+        }
+
+        function checkQuiz() {
+            const selects = document.querySelectorAll('.quiz-answer');
+            let correctCount = 0;
+            
+            selects.forEach(select => {
+                const container = select.parentElement;
+                if (select.value === select.dataset.answer) {
+                    correctCount++;
+                    container.style.borderColor = "#10b981";
+                    container.style.backgroundColor = "#ecfdf5";
+                } else {
+                    container.style.borderColor = "#ef4444";
+                    container.style.backgroundColor = "#fef2f2";
+                }
+            });
+
+            const feedback = document.getElementById('quizFeedback');
+            if (feedback) {
+                feedback.classList.remove('hidden');
+                if (correctCount === selects.length) {
+                    feedback.className = "mt-6 p-4 rounded-2xl bg-green-500 text-white font-bold text-center";
+                    feedback.innerHTML = "Tuyệt đỉnh! Bạn đã thuộc lòng nhóm này!";
+                } else {
+                    feedback.className = "mt-6 p-4 rounded-2xl bg-orange-100 text-orange-700 font-bold text-center";
+                    feedback.innerHTML = `Bạn đúng ${correctCount}/${selects.length}. Thử lại chút nhé!`;
+                }
+            }
+        }
+
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => {};
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
